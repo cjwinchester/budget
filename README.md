@@ -2,16 +2,7 @@
 
 :fire: :moneybag: :fire:
 
-caveat emptor, this is a 
-
-  __                       .__        _____.__                
-_/  |_____________    _____|  |__   _/ ____\__|______   ____  
-\   __\_  __ \__  \  /  ___/  |  \  \   __\|  \_  __ \_/ __ \ 
- |  |  |  | \// __ \_\___ \|   Y  \  |  |  |  ||  | \/\  ___/ 
- |__|  |__|  (____  /____  >___|  /  |__|  |__||__|    \___  >
-                  \/     \/     \/                         \/ 
-
-not intended to be used in production, ever, for any reason
+caveat emptor, this is a trash fire not intended to be used in production, ever, for any reason
 
 ### Requirements
 * python
