@@ -6,14 +6,12 @@ from django.db import connection
 from calendar import monthrange
 
 
-grand_total_spending = Spending.objects.aggregate(Sum("amount"))
-grand_total_income = Income.objects.aggregate(Sum("amount"))
-monthly_budget_total = Budget.objects.aggregate(Sum('monthly_budget'))['monthly_budget__sum']
-earliest_date = Spending.objects.earliest('spending_date').spending_date
-last_updated_at = Spending.objects.latest("last_modified").last_modified
-
-
 def main(request):
+    last_updated_at = Spending.objects.latest("last_modified").last_modified
+    grand_total_spending = Spending.objects.aggregate(Sum("amount"))
+    grand_total_income = Income.objects.aggregate(Sum("amount"))
+    monthly_budget_total = Budget.objects.aggregate(Sum('monthly_budget'))['monthly_budget__sum']
+    earliest_date = Spending.objects.earliest('spending_date').spending_date
     transfer_to_savings_total = Spending.objects.filter(cat__category__icontains="savings").aggregate(Sum("amount"))['amount__sum']
     n = datetime.now()
     current_day = n.day
@@ -81,6 +79,8 @@ def main(request):
     
     
 def category(request, pk):
+    last_updated_at = Spending.objects.latest("last_modified").last_modified
+    grand_total_spending = Spending.objects.aggregate(Sum("amount"))
     categories = Budget.objects.all()
     budget_item = categories.get(pk=pk)
     spending = Spending.objects.filter(cat=pk)
@@ -115,6 +115,7 @@ def category(request, pk):
 
 
 def category_index(request):
+    last_updated_at = Spending.objects.latest("last_modified").last_modified
     categories = Budget.objects.all()
     cats = categories.values('pk', 'category').annotate(Sum('spending__amount')).order_by('-spending__amount__sum')
 
@@ -126,6 +127,7 @@ def category_index(request):
 
 
 def expense(request, exp_id):
+    last_updated_at = Spending.objects.latest("last_modified").last_modified
     single_expense = Spending.objects.get(pk=exp_id)
     d = {
         'single_expense': single_expense,
@@ -135,6 +137,8 @@ def expense(request, exp_id):
     
     
 def recipient(request, pk):
+    last_updated_at = Spending.objects.latest("last_modified").last_modified
+    grand_total_spending = Spending.objects.aggregate(Sum("amount"))
     categories = Budget.objects.all()
     spending = Spending.objects.filter(recipient=pk).order_by('-spending_date')
     spending_total = spending.aggregate(Sum('amount'))['amount__sum']
@@ -157,6 +161,7 @@ def recipient(request, pk):
     
 
 def day(request, year, month, day):
+    last_updated_at = Spending.objects.latest("last_modified").last_modified
     spending = Spending.objects.filter(
         spending_date__year=year,
         spending_date__month=int(month),
@@ -186,6 +191,8 @@ def day(request, year, month, day):
 
 
 def month(request, year, month):
+    last_updated_at = Spending.objects.latest("last_modified").last_modified
+    monthly_budget_total = Budget.objects.aggregate(Sum('monthly_budget'))['monthly_budget__sum']
     spending = Spending.objects.filter(
         spending_date__year=year,
         spending_date__month=int(month),
@@ -252,6 +259,7 @@ def month(request, year, month):
 
 
 def year(request, year):
+    last_updated_at = Spending.objects.latest("last_modified").last_modified
     spending = Spending.objects.filter(
         spending_date__year=year
     )
@@ -270,6 +278,7 @@ def year(request, year):
 
     
 def search(request):
+    last_updated_at = Spending.objects.latest("last_modified").last_modified
     query = request.GET.get('q', '')
     exploded = query.split(" ")
     q_objects = Q()
@@ -281,5 +290,9 @@ def search(request):
     else:
         results = []
 
-    d = {'results': results, 'query': query}
+    d = {
+        'results': results,
+        'query': query,
+        'last_updated_at': last_updated_at
+    }
     return render(request, 'budget/search.html', d)
