@@ -1,0 +1,48 @@
+{% extends 'budget/base.html' %}
+{% load humanize %}
+
+{% block title %}{% if query %}{{ results.count|intcomma }} result{{ results.count|pluralize }} for "{{query|escape}}" ~ {% endif %}search {% endblock %}
+
+{% block content %}
+    <div class="container">
+
+        {% if query %}    
+            <h1>{{ results.count }} result{{ results.count|pluralize }} for "{{ query|escape }}"</h1>
+            {% if results.count > 0 %}
+            <table class="table lead">
+                <thead>
+                    <tr>
+                        <th>
+                        Recipient
+                        </th>
+                        <th>
+                        Total
+                        </th>
+                   </tr>
+                </thead>
+                <tbody>
+            {% for result in results %}
+                <tr>
+                    <td>
+                    <a href="{% url 'recipient-view' result.pk %}">{{ result.name }}</a>
+                    </td>
+                    <td>
+                    ${{ result.total_sum|intcomma }}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            </table>
+            {% endif %}
+            <h3 style="margin-top:50px;"><i class="fa fa-search"></i> Search again</h3>
+            <form action="/budget/search" method="GET">
+                <input type="text" class="form-control input-lg" name="q" value="{{ query|escape }}" placeholder="Find a recipient">
+            </form>
+        {% else %}
+        <h1><i class="fa fa-search"></i> Search</h1>
+        <form action="/budget/search" method="GET">
+            <input type="text" class="form-control input-lg" name="q" value="{{ query|escape }}" placeholder="Find a recipient">
+        </form>
+        {% endif %}
+    </div>    
+{% endblock %}

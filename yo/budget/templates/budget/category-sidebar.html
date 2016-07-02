@@ -1,0 +1,8 @@
+<h3 style="margin-top:0;"><i class="fa fa-database"></i>&ensp;Pick a category</h3>
+
+<select class="form-control input-lg" onchange="javascript: if (this.value) {window.location = '/budget/categories/' + this.value;}">
+    <option></option>
+    {% for cat in categories %}
+    <option value="{{ cat.pk }}">{{cat.category}}</option>
+    {% endfor %}
+</select>

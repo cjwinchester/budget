@@ -1,0 +1,137 @@
+{% extends 'budget/base.html' %}
+{% load humanize %}
+
+{% block content %}
+
+{% now "F" as name_of_this_month %}
+{% now "Y" as name_of_this_year %}
+
+<section style="margin-top: 50px; margin-bottom:50px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-8">
+ 
+        <div class="alert alert-{% if monthly_diff_pct <= 100 %}success{% else %}danger{% endif %}" role="alert">
+           {% if monthly_diff_pct <= 100 %}<strong><i class="fa fa-thumbs-o-up"></i> Congrats</strong> &mdash; you're meeting your budget this month.{% else %}<strong><i class="fa fa-thumbs-o-down"></i> Sad trombone</strong> &mdash; you're over budget this month.{% endif %}
+        </div>
+            <h1 style="padding: 15px; margin: 0 0 55px 0; background: -webkit-gradient(linear, left top, right top, color-stop({{monthly_diff_pct}}%, {{ monthly_col_accent }}), color-stop({{monthly_diff_pct}}%, #f7f7f7)); background: -moz-linear-gradient(left center,{{ monthly_col_accent }} {{monthly_diff_pct}}%, #f7f7f7 {{monthly_diff_pct}}%); background: -o-linear-gradient(left, {{ monthly_col_accent }} {{monthly_diff_pct}}%, #f7f7f7 {{monthly_diff_pct}}%); background: linear-gradient(to right, {{ monthly_col_accent }} {{monthly_diff_pct}}%, #f7f7f7 {{monthly_diff_pct}}%); border-left: 5px solid {{ monthly_col }}">
+            With {{ days_left_this_month }} day{{ days_left_this_month|pluralize }} left in {{ name_of_this_month }}, we've spent <span class="bold">${{ total_this_month|intcomma }}</span> ({{monthly_diff_pct|floatformat:"0"}}%) of our <span class="bold">${{ monthly_budget_total|apnumber|intcomma }}</span> monthly budget.
+        </h1>
+            
+        <h2>Categories</h2>
+        {% for cat in this_month %}
+        <div class="item-category" style="background: -webkit-gradient(linear, left top, right top, color-stop({{cat.pct}}%, {{ cat.col_accent }}), color-stop({{cat.pct}}%, #f7f7f7)); background: -moz-linear-gradient(left center,{{ cat.col_accent }} {{cat.pct}}%, #f7f7f7 {{cat.pct}}%); background: -o-linear-gradient(left, {{ cat.col_accent }} {{cat.pct}}%, #f7f7f7 {{cat.pct}}%); background: linear-gradient(to right, {{ cat.col_accent }} {{cat.pct}}%, #f7f7f7 {{cat.pct}}%); border-left: 5px solid {{ cat.col }}">
+
+        <h3 style="margin-bottom:2px;"><a href="{% url 'category-view' cat.category_pk %}">{{ cat.category }}</a> ({{ cat.pct }}%)</h3>
+        ${{ cat.total_spent|intcomma }} / ${{ cat.budgeted_amount|intcomma }}
+        &ensp;{% if cat.autopay %}<span class="note label-autopay">autopay</span>{% endif %}
+        </div>
+        {% endfor %}
+            </div>
+            <div class="col-sm-4">
+
+                <div class="sider">
+                {% include 'budget/search-sidebar.html' %}
+                </div>
+                
+                <div class="sider">
+                    <h3><i class="fa fa-clock-o"></i>&ensp;Recent spending</h3>
+                    <table class="table">
+                    {% for spend in recent_spending %}
+                        <tr>
+                            <td>
+                            <a href="{% url 'expense-view' spend.pk %}">${{ spend.amount|intcomma }}</a>
+                            </td>
+                            <td>
+                            <a href="{% url 'day-view' spend.spending_date.year spend.spending_date.month spend.spending_date.day %}">{{ spend.spending_date|date:"F j" }}</a>
+                            </td>
+                            <td>
+                            <a href="{% url 'recipient-view' spend.recipient.pk %}">{{ spend.recipient }}</a>
+                            </td>
+                            </tr>
+                    {% endfor %}
+                    </table>
+                </div>
+                
+                <div class="sider">
+            <h3><i class="fa fa-line-chart"></i>&ensp;Top recipients</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                    <th>
+                    Recipient
+                    </th>
+                    <th>
+                    Total
+                    </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for recip in top_recips %}
+                    {% if recip.total_sum %}
+                    <tr>
+                        <td>{{ forloop.counter }}. <a href="{% url 'recipient-view' recip.pk %}">{{ recip.name }}</a>
+                        </td>
+                        <td>
+                            ${{ recip.total_sum|intcomma }}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+
+                <div class="sider">                
+                    <h3><i class="fa fa-calendar"></i>&ensp;Jump to a month</h3>
+                    <input type="text" class="form-control input-lg datepicker" />
+                </div>            
+            
+                <div class="sider">
+                <h3><i class="fa fa-credit-card"></i>&ensp;Grand total</h3>
+                <p class="small">{{ earliest_date }} to {{ last_updated_at|date }}</p>
+                <table class="table">
+                    <tr>
+                        <td class="bold">Income</td>
+                        <td>${{ grand_total_income.amount__sum|intcomma }}</td>
+                    </tr>
+                    <tr>
+                        <td class="bold">Spending*</td>
+                        <td>${{ grand_total_spending.amount__sum|intcomma }}</td>
+                    </tr>
+                </table>
+                <hr>
+                <p class="small note">*Includes ${{ transfer_to_savings_total }} transferred to savings</p>
+                </div>
+            
+            
+        </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block js %}
+<script>
+    
+    var start = new Date("{{ earliest_date|date:'m/d/Y' }}");
+    var end = new Date("{{ last_updated_at|date:'m/d/Y' }}");
+
+    $(".datepicker").datepicker( {
+        format: "MM yyyy",
+        startView: "months", 
+        minViewMode: "months",
+        startDate: start,
+        endDate: end,
+        autoclose: true
+    })
+    .on('changeDate', function(e) {
+        var month = e.date.getMonth() + 1;
+        var year = e.date.getFullYear();
+        window.location = ["/budget", year, month].join("/");
+    });
+    ;
+    
+</script>
+{% endblock %}

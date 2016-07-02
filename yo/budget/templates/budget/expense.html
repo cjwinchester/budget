@@ -1,0 +1,47 @@
+{% extends 'budget/base.html' %}
+{% load humanize %}
+
+{% block title %}expense ~ {{ single_expense }} {% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+    <div class="col-sm-7">
+    <h1 class="bold" style="margin-top:0;">${{ single_expense.amount|intcomma }}</h1>
+    <table class="table" style="margin-top:25px;">
+            <tr>
+                <td class="bold" style="border-top:none;">Date</td>
+                <td style="border-top:none;"><a href="{% url 'day-view' single_expense.spending_date.year single_expense.spending_date.month single_expense.spending_date.day %}">{{ single_expense.spending_date }}</a></td>
+            </tr>
+            <tr>
+                <td class="bold">Recipient</td>
+                <td><a href="{% url 'recipient-view' single_expense.recipient.pk %}">{{ single_expense.recipient }}</a></td>
+            </tr>
+            <tr>
+                <td class="bold">Spender</td>
+                <td>{{ single_expense.human|title }}</td>
+            </tr>
+            <tr>
+                <td class="bold">Category</td>
+                <td><a href="{% url 'category-view' single_expense.cat.pk %}">{{ single_expense.cat.category }}</a></td>
+            </tr>
+        </table>
+        
+        {% if single_expense.get_previous_by_spending_date or single_expense.get_next_by_spending_date %}
+        <div style="margin-top:20px;">
+        {% if single_expense.get_previous_by_spending_date %}
+            <a role="button" class="sm-muted-button pull-left" href="{% url 'expense-view' single_expense.get_previous_by_spending_date.pk %}"><i class="fa fa-arrow-left"></i>&ensp;Previous</a>
+        {% endif %}
+        {% if single_expense.get_next_by_spending_date %}
+            <a role="button" class="sm-muted-button pull-right" href="{% url 'expense-view' single_expense.get_next_by_spending_date.pk %}">Next&ensp;<i class="fa fa-arrow-right"></i></a>            
+        {% endif %}
+        </div>
+        {% endif %}
+        
+    </div>
+    <div class="col-sm-4 col-md-offset-1">
+    {% include 'budget/search-sidebar.html' %}
+    </div>
+</div>
+{% endblock %}

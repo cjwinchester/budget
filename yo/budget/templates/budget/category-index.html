@@ -1,0 +1,32 @@
+{% extends 'budget/base.html' %}
+{% load humanize %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-8">
+        <h1 class="bold" style="margin-top: 0;">Categories</h1>
+        <table class="table">
+                {% for cat in cats %}
+                <tr>
+                    <td{% if forloop.first %} style="border-top:none;"{% endif %}>
+                    <a href="{% url 'category-view' cat.pk %}">
+                    {{ cat.category }}
+                    </a> ({{ cat.pct }}%)
+                    </td>
+                    <td{% if forloop.first %} style="border-top:none;"{% endif %}>
+                    {% if cat.spending__amount__sum %}
+                    ${{ cat.spending__amount__sum|intcomma }}
+                    {% else %}
+                    $0
+                    {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

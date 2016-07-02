@@ -1,0 +1,164 @@
+{% extends 'budget/base.html' %}
+{% load humanize month_from_string %}
+
+{% block title %}{{ budget_item.category|lower }} {% endblock %}
+
+{% block content %}
+
+    <div class="container">
+    <div class="row">
+    <div class="col-sm-8">
+    <h1 class="bold" style="margin-top: 0;">{{ budget_item.category }}</h1>
+        <p class="lead">The monthly budget is <b>${{ budget_item.monthly_budget|intcomma }}</b>.{% if spending_total == 0 %} But you haven't spent anything in this category.{% else %} In an average month, you spend <b>${{ spending_by_month_avg|floatformat:"2"|intcomma }}</b>.</p>
+        
+        <p class="lead">According to the budget, this category should make up about <b>{{ budgeted_pct|floatformat:"0" }}%</b> of your total spending. {% if budgeted_pct|floatformat:"0" == pct_of_total_spending|floatformat:"0" %}Which, yup, it's about {% else %}In reality, it's about {% endif %}<b>{{ pct_of_total_spending|floatformat:"0" }}%</b>.</p>
+    
+        <h3 class="bold" style="margin: 50px auto 15px auto;">Total: ${{ spending_total|intcomma }}</h3>
+
+        <canvas id="spending_by_month_chart" width="400" height="150"></canvas>
+
+        <h3 class="bold" style="margin: 50px auto 15px auto;">{% if top_recipients|length > 1 %}Top recipients in this category{% else %}Recipient{% endif %}</h3>
+        <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Total
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for recip in top_recipients %}
+        <tr>
+            <td>
+                <a href="{% url 'recipient-view' recip.recipient %}">{{ recip.recipient__name }}</a>
+            </td>
+            <td>
+                ${{ recip.amount__sum|intcomma }}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+
+        <h3 class="bold" style="margin: 50px auto 15px auto;">Recent spending in this category</h3>
+        <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Recipient
+                </th>
+                <th>
+                    Date
+                </th>
+                <th>
+                    Amount
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for spend in recent_spending %}
+        <tr>
+            <td>
+                <a href="{% url 'recipient-view' spend.recipient.pk %}">{{ spend.recipient.name }}</a>
+            </td>
+            <td>
+                <a href="{% url 'day-view' spend.spending_date.year spend.spending_date.month spend.spending_date.day %}">
+                {{ spend.spending_date }}
+                </a>
+            </td>
+            <td>
+                <a href="{% url 'expense-view' spend.pk %}">
+                ${{ spend.amount|intcomma }}
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+
+
+        {% endif %}
+        
+    </div>
+
+    <div class="col-md-4">
+        <div class="sider">
+            {% include 'budget/search-sidebar.html' %}
+        </div>
+        <div class="sider">
+            {% include 'budget/category-sidebar.html' %}
+        </div>
+    </div>
+    </div>
+    </div>
+    
+    
+{% endblock %}
+
+{% block js %}
+{% if spending_total > 0 %}
+<script>
+var ctx = document.getElementById("spending_by_month_chart");
+
+var spending_chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: [{% for spending_item in spending_by_month %}"{{ spending_item.month|monthyear }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+        datasets: [
+        {
+            label: 'Spending',
+            data: [{% for spending in spending_by_month %}{{ spending.amount__sum }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+            backgroundColor: '#398439',
+            hoverBackgroundColor: '#398439'
+        }
+        ]
+    },
+    options: {
+        legend: {
+            display: false
+        },
+        tooltips: {
+            enabled: false
+        },
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true,
+                    callback: function(value, index, values) {
+                        return '$' + addCommas(value);
+                    }
+                },
+                gridLines: {
+                    drawBorder: false,
+                    color: '#f7f7f7',
+                    zeroLineWidth: 0.2,
+                    zeroLineColor: '#f7f7f7'
+                }
+            }],
+            xAxes: [{
+                gridLines: {
+                    display: false,
+                    zeroLineWidth: 0.2,
+                    zeroLineColor: '#f7f7f7'
+                }
+            }]
+        },
+        annotation: {
+            annotations: [{
+                type: 'line',
+                mode: 'horizontal',
+                scaleID: 'y-axis-0',
+                value: '{{ budget_item.monthly_budget }}',
+                borderColor: '#d43f3a',
+                borderWidth: 2
+            }]
+        },
+    }
+});
+
+</script>
+{% endif %}
+{% endblock %}
