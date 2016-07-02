@@ -83,8 +83,6 @@ local_settings.py
 db.sqlite3
 media
 
-client_secrets.json
-storage.json
 yo/static/budget
 yo/budget/static/budget
 yo/budget/management/commands/client_secret.json
