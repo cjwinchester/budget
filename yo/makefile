@@ -5,3 +5,6 @@ backup:
     
 server:
 	python manage.py runserver
+    
+user:
+	python manage.py loaddata project/fixtures/users_testdata.json

@@ -64,6 +64,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-watch');
   
-  grunt.registerTask('default', ['copy:fonts','uglify', 'less', 'watch']);
+  grunt.registerTask('default', ['copy:fonts','uglify', 'less']);
 
 };
