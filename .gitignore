@@ -73,7 +73,6 @@ ENV/
 # Rope project settings
 .ropeproject
 
-
 ### Django ###
 *.log
 *.pot
@@ -83,10 +82,12 @@ local_settings.py
 db.sqlite3
 media
 
+# backups/static
+client_secret.json
 yo/static/budget
 yo/budget/static/budget
-yo/budget/management/commands/client_secret.json
-yo/budget/management/commands/storage.json
+client_secret.json
+backup.json
 
 
 ### grunt/npm ###
