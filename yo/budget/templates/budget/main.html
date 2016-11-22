@@ -10,13 +10,9 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-8">
- 
-        <div class="alert alert-{% if monthly_diff_pct <= 100 %}success{% else %}danger{% endif %}" role="alert">
-           {% if monthly_diff_pct <= 100 %}<strong><i class="fa fa-thumbs-o-up"></i> Congrats</strong> &mdash; you're meeting your budget this month.{% else %}<strong><i class="fa fa-thumbs-o-down"></i> Sad trombone</strong> &mdash; you're over budget this month.{% endif %}
-        </div>
-            <h1 style="padding: 15px; margin: 0 0 55px 0; background: -webkit-gradient(linear, left top, right top, color-stop({{monthly_diff_pct}}%, {{ monthly_col_accent }}), color-stop({{monthly_diff_pct}}%, #f7f7f7)); background: -moz-linear-gradient(left center,{{ monthly_col_accent }} {{monthly_diff_pct}}%, #f7f7f7 {{monthly_diff_pct}}%); background: -o-linear-gradient(left, {{ monthly_col_accent }} {{monthly_diff_pct}}%, #f7f7f7 {{monthly_diff_pct}}%); background: linear-gradient(to right, {{ monthly_col_accent }} {{monthly_diff_pct}}%, #f7f7f7 {{monthly_diff_pct}}%); border-left: 5px solid {{ monthly_col }}">
-            With {{ days_left_this_month }} day{{ days_left_this_month|pluralize }} left in {{ name_of_this_month }}, we've spent <span class="bold">${{ total_this_month|intcomma }}</span> ({{monthly_diff_pct|floatformat:"0"}}%) of our <span class="bold">${{ monthly_budget_total|apnumber|intcomma }}</span> monthly budget.
-        </h1>
+                <h1 style="padding: 15px; margin: 0 0 55px 0; background: -webkit-gradient(linear, left top, right top, color-stop({{monthly_diff_pct}}%, {{ monthly_col_accent }}), color-stop({{monthly_diff_pct}}%, #f7f7f7)); background: -moz-linear-gradient(left center,{{ monthly_col_accent }} {{monthly_diff_pct}}%, #f7f7f7 {{monthly_diff_pct}}%); background: -o-linear-gradient(left, {{ monthly_col_accent }} {{monthly_diff_pct}}%, #f7f7f7 {{monthly_diff_pct}}%); background: linear-gradient(to right, {{ monthly_col_accent }} {{monthly_diff_pct}}%, #f7f7f7 {{monthly_diff_pct}}%); border-left: 5px solid {{ monthly_col }}">
+                    With {{ days_left_this_month }} day{{ days_left_this_month|pluralize }} left in {{ name_of_this_month }}, we've spent <span class="bold">${{ total_this_month|intcomma }}</span> ({{monthly_diff_pct|floatformat:"0"}}%) of our <span class="bold">${{ monthly_budget_total|apnumber|intcomma }}</span> monthly budget.
+                </h1>
             
         <h2>Categories</h2>
         {% for cat in this_month %}
@@ -56,16 +52,6 @@
                 <div class="sider">
             <h3><i class="fa fa-line-chart"></i>&ensp;Top recipients</h3>
             <table class="table">
-                <thead>
-                    <tr>
-                    <th>
-                    Recipient
-                    </th>
-                    <th>
-                    Total
-                    </th>
-                    </tr>
-                </thead>
                 <tbody>
                     {% for recip in top_recips %}
                     {% if recip.total_sum %}
@@ -93,15 +79,21 @@
                 <table class="table">
                     <tr>
                         <td class="bold">Income</td>
-                        <td>${{ grand_total_income.amount__sum|intcomma }}</td>
+                        <td class="text-right">${{ grand_total_income.amount__sum|intcomma }}</td>
                     </tr>
                     <tr>
                         <td class="bold">Spending*</td>
-                        <td>${{ grand_total_spending.amount__sum|intcomma }}</td>
+                        <td class="text-right">${{ grand_total_spending.amount__sum|intcomma }}</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td class="bold text-right" style="color:{% if balance < 0 %}#d43f3a{% else %}#398439{% endif %}">
+                            {{ balance }}
+                        </td>
                     </tr>
                 </table>
                 <hr>
-                <p class="small note">*Includes ${{ transfer_to_savings_total }} transferred to savings</p>
+                <p class="small note">*Includes ${{ transfer_to_savings_total|apnumber|intcomma }} transferred to savings</p>
                 </div>
             
             

@@ -27,6 +27,10 @@
                 <td><a href="{% url 'category-view' single_expense.cat.pk %}">{{ single_expense.cat.category }}</a></td>
             </tr>
         </table>
+
+        {% if single_expense.notes %}
+        <p class="small text-muted">{{ single_expense.notes }}</p>
+        {% endif %}
         
         {% if single_expense.get_previous_by_spending_date or single_expense.get_next_by_spending_date %}
         <div style="margin-top:20px;">

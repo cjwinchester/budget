@@ -1,0 +1,51 @@
+{% extends 'budget/base.html' %}
+{% load humanize %}
+
+{% block title %}{{ display_date }} {% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-7">
+            <h1 style="margin-top:0;"><strong><a href="{% url 'month-view' display_date.year display_date.month %}">{{ display_date|date:"F" }}</a> {{ display_date|date:"j" }}, <a href="{% url 'year-view' display_date.year %}">{{ display_date|date:"Y" }}</a></strong>: ${{ total_sum|intcomma }}</h1>           
+            <table class="table" style="margin-top:25px;">
+                {% for spend in spending %}
+                <tr>
+                    <td{% if forloop.first and spending|length > 1 %} style="border-top:none;"{% endif %}>
+                        <a href="{% url 'expense-view' spend.pk %}">${{ spend.amount|intcomma }}</a>
+                    </td>
+                    <td{% if forloop.first and spending|length > 1 %} style="border-top:none;"{% endif %}>
+                        <a href="{% url 'recipient-view' spend.recipient.pk %}">
+                        {{ spend.recipient.name }}
+                        </a>
+                    </td>
+                    <td{% if forloop.first and spending|length > 1 %} style="border-top:none;"{% endif %}>
+                        <a href="{% url 'category-view' spend.cat.pk %}">
+                        {{ spend.cat.category }}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            
+            {% if previous or next %}
+            <div style="margin-top: 20px;">            
+            {% if previous %}
+            <a role="button" class="sm-muted-button pull-left notouchy" href="{% url 'day-view' previous.spending_date.year previous.spending_date.month previous.spending_date.day %}"><i class="fa fa-arrow-left"></i>&ensp;Previous day</a></p>
+            {% endif %}
+            {% if next %}
+            <a role="button" class="sm-muted-button pull-right notouchy" href="{% url 'day-view' next.spending_date.year next.spending_date.month next.spending_date.day %}">Next day&ensp;<i class="fa fa-arrow-right"></i></a></p>
+            {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-sm-4 col-md-offset-1">
+            <div class="sider">
+            {% include 'budget/search-sidebar.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

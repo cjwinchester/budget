@@ -1,15 +1,29 @@
 from django.shortcuts import render
 from django.db.models import Sum, Avg, Q
+
 from budget.models import Budget, Spending, Recipient, Income
+
 from datetime import datetime
 from django.db import connection
 from calendar import monthrange
+
+budget_color_conf = {
+    "meeting_budget": {
+        "color": "#398439",
+        "accent_color": "#dff0d8"
+    },
+    "over_budget": {
+        "color": "#d43f3a",
+        "accent_color": "#f2dede"
+    }
+}
 
 
 def main(request):
     last_updated_at = Spending.objects.latest("last_modified").last_modified
     grand_total_spending = Spending.objects.aggregate(Sum("amount"))
     grand_total_income = Income.objects.aggregate(Sum("amount"))
+    balance = grand_total_income['amount__sum'] - grand_total_spending['amount__sum']
     monthly_budget_total = Budget.objects.aggregate(Sum('monthly_budget'))['monthly_budget__sum']
     earliest_date = Spending.objects.earliest('spending_date').spending_date
     transfer_to_savings_total = Spending.objects.filter(cat__category__icontains="savings").aggregate(Sum("amount"))['amount__sum']
@@ -24,12 +38,14 @@ def main(request):
         monthly_diff_pct = 0
     else:
         monthly_diff_pct = (total_this_month / monthly_budget_total) * 100
+
+    monthly_col = budget_color_conf["meeting_budget"].get("color", "#000")
+    monthly_col_accent = budget_color_conf["meeting_budget"].get("accent_color", "#000")
+
     if monthly_diff_pct > 100:
-        monthly_col = "#d43f3a"
-        monthly_col_accent = "#f2dede"
-    else:
-        monthly_col = "#398439"
-        monthly_col_accent = "#dff0d8"
+        monthly_col = budget_color_conf["over_budget"].get("color", "#000")
+        monthly_col_accent = budget_color_conf["over_budget"].get("accent_color", "#000")
+
     top_recips = Recipient.objects.annotate(total_sum=Sum('spending__amount')).order_by('-total_sum')[:10]
     recent_spending = Spending.objects.all()[:10]
     
@@ -47,12 +63,13 @@ def main(request):
             pct = 0
         else:
             pct = (total_spent / budget_item.monthly_budget) * 100
+        col = budget_color_conf["meeting_budget"].get("color", "#000")
+        col_accent = budget_color_conf["meeting_budget"].get("accent_color", "#000")
+
         if pct > 100:
-            col = "#d43f3a"
-            col_accent = "#f2dede"
-        else:
-            col = "#398439"
-            col_accent = "#dff0d8"
+            col = budget_color_conf["over_budget"].get("color", "#000")
+            col_accent = budget_color_conf["over_budget"].get("accent_color", "#000")
+
         d['total_spent'] = total_spent
         d['pct'] = int(pct)
         d['col'] = col
@@ -72,6 +89,7 @@ def main(request):
         'last_updated_at': last_updated_at,
         'grand_total_spending': grand_total_spending,
         'grand_total_income': grand_total_income,
+        'balance': balance,
         'transfer_to_savings_total': transfer_to_savings_total,
         'recent_spending': recent_spending
     }
@@ -187,7 +205,7 @@ def day(request, year, month, day):
         'display_date': spending[0].spending_date,
         'last_updated_at': last_updated_at
     }
-    return render(request, 'budget/time.html', d)
+    return render(request, 'budget/day.html', d)
 
 
 def month(request, year, month):
@@ -197,23 +215,24 @@ def month(request, year, month):
         spending_date__year=year,
         spending_date__month=int(month),
     )
-    verbose_month = spending[0].spending_date.strftime("%B")
+    display_date = spending[0].spending_date
     truncate_date = connection.ops.date_trunc_sql('day', 'spending_date')
     qs = spending.extra({'day': truncate_date})
     spending_by_day = qs.values('day').annotate(Sum('amount')).order_by('day')
     total_sum = spending.aggregate(Sum('amount'))['amount__sum']
-    
+        
     if not total_sum:
         total_sum = 0
         monthly_diff_pct = 0
     else:
         monthly_diff_pct = (total_sum / monthly_budget_total) * 100
+
+    monthly_col = budget_color_conf["meeting_budget"].get("color", "#000")
+    monthly_col_accent = budget_color_conf["meeting_budget"].get("accent_color", "#000")
+
     if monthly_diff_pct > 100:
-        monthly_col = "#d43f3a"
-        monthly_col_accent = "#f2dede"
-    else:
-        monthly_col = "#398439"
-        monthly_col_accent = "#dff0d8"
+        monthly_col = budget_color_conf["over_budget"].get("color", "#000")
+        monthly_col_accent = budget_color_conf["over_budget"].get("accent_color", "#000")
     
     days_in_this_month = monthrange(int(year), int(month))[1]
     
@@ -243,19 +262,75 @@ def month(request, year, month):
               
         spending_all_days.append(d)
 
+    # ugh
+    months_of_the_year = {
+        "1": "January",
+        "2": "February",
+        "3": "March",
+        "4": "April",
+        "5": "May",
+        "6": "June",
+        "7": "July",
+        "8": "August",
+        "9": "September",
+        "10": "October",
+        "11": "November",
+        "12": "December"
+    }
+        
+    previous_month = str(int(month) - 1)
+    previous_year = year
+    if previous_month == 0:
+        previous_month = "12"
+        previous_year = str(int(year) - 1)
+        
+    next_month = str(int(month) + 1)
+    next_year = year
+    if next_month == 13:
+        next_month = "1"
+        next_year = str(int(next_year) + 1)
 
+    next_month_qs = Spending.objects.filter(
+        spending_date__year=next_year,
+        spending_date__month=next_month,
+    )
+
+    if next_month_qs.count() > 0:
+        next_up = {
+            "month": next_month,
+            "verbose_month": months_of_the_year.get(next_month),
+            "year": next_year
+        }
+    else:
+        next_up = None
+
+    previous_month_qs = Spending.objects.filter(
+        spending_date__year=previous_year,
+        spending_date__month=int(previous_month),
+    )
+    if previous_month_qs.count() > 0:
+        previous_up = {
+            "month": previous_month,
+            "verbose_month": months_of_the_year.get(previous_month),
+            "year": previous_year
+        }
+    else:
+        previous_up = None
+        
     d = {
         'time_value': 'month',
         'monthly_budget_total': monthly_budget_total,
         'spending_by_time': spending_all_days,
         'total_sum': total_sum,
-        'display_date': verbose_month + " " + year,
+        'display_date': display_date,
         'monthly_diff_pct': monthly_diff_pct,
         'monthly_col': monthly_col,
         'monthly_col_accent': monthly_col_accent,
-        'last_updated_at': last_updated_at
+        'last_updated_at': last_updated_at,
+        'next': next_up,
+        'previous': previous_up,
     }
-    return render(request, 'budget/time.html', d)
+    return render(request, 'budget/month.html', d)
 
 
 def year(request, year):
@@ -274,7 +349,7 @@ def year(request, year):
         'display_date': year,
         'last_updated_at': last_updated_at
     }
-    return render(request, 'budget/time.html', d)
+    return render(request, 'budget/year.html', d)
 
     
 def search(request):

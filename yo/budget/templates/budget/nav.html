@@ -12,10 +12,10 @@
 
  <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
     <ul class="nav navbar-nav navbar-left">
-        <li><a href="/budget/" data-toggle="tooltip" data-placement="bottom" title="Home"><i class="fa fa-home"></i></a></li>
+        <li><a href="/budget/"><i class="fa fa-home"></i></a></li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
-        <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Updated {{ last_updated_at|date }}"><i class="fa fa-refresh"></i></a></li>
+        <li><a href="#"><strong>Updated {{ last_updated_at|timesince }} ago</strong></a></li>
         <li><a href="/budget/search/" data-toggle="tooltip" data-placement="bottom" title="Search"><i class="fa fa-search"></i></a></li>
         <li><a href="/admin/budget/" target="_blank" data-toggle="tooltip" data-placement="bottom" title="Add data"><i class="fa fa-plus-square"></i></a></li>
     </ul>

@@ -68,6 +68,9 @@
             <div class="row">
                 <div class="col-xs-12">
                     <h3><a href="{% url 'day-view' thing.day.year thing.day.month thing.day.day %}">{{ thing.day|date:"F j" }}</a>: ${{ thing.amount|intcomma }}</h3>
+                    {% for s in spending_by_day %}
+                        {{ s }}
+                    {% endfor %}
                 </div>
             </div>
             {% endfor %}
