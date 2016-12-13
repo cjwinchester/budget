@@ -19,23 +19,38 @@ class Budget(models.Model):
 
     def __str__(self):
         return self.category
-        
+
     class Meta:
         ordering = ('category',)
         verbose_name = "Budget item"
         verbose_name_plural = "Budget items"
-    
+
+
+class MajorExpense(models.Model):
+    name = models.CharField(max_length=150)
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+    notes = models.TextField(blank=True)
+
+    def get_total_spent(self):
+        return sum([x.amount for x in self.spending_set.all()])
+
+    def __str__(self):
+        return str(self.name)
+
 
 class Recipient(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    
+
     def __str__(self):
         return str(self.name)
 
     class Meta:
         ordering = ('name',)
-        
-    
+
+
 class Spending(models.Model):
     cat = models.ForeignKey(
         Budget,
@@ -53,21 +68,22 @@ class Spending(models.Model):
         max_length=20,
         choices=HUMANS
     )
+    major_expense = models.ForeignKey(MajorExpense, blank=True, null=True)
     notes = models.TextField(
         blank=True,
         null=True
     )
     last_modified = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return str(self.spending_date)
-        
+
     class Meta:
         ordering = ('-spending_date',)
         verbose_name = "Spending"
         verbose_name_plural = "Spending"
-        
-        
+
+
 class Income(models.Model):
     income_date = models.DateField(
         verbose_name="Date"
@@ -81,14 +97,13 @@ class Income(models.Model):
         choices=HUMANS
     )
     notes = models.TextField(
-        blank=True,
-        null=True
+        blank=True
     )
     last_modified = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return str(self.income_date)
-        
+
     class Meta:
         ordering = ('-income_date',)
         verbose_name = "Incoming payment"

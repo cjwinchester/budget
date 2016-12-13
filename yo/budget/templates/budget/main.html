@@ -1,5 +1,5 @@
 {% extends 'budget/base.html' %}
-{% load humanize %}
+{% load humanize get_pct %}
 
 {% block content %}
 
@@ -29,6 +29,20 @@
                 <div class="sider">
                 {% include 'budget/search-sidebar.html' %}
                 </div>
+
+                {% if active_major_expenses %}
+                <div class="sider">
+                    <h3><i class="fa fa-birthday-cake"></i> Saving up for</h3>
+                    {% for me in active_major_expenses %}
+                        <p style="margin:0; font-weight: bold;">{{ me.name }}</p>
+                        <p class="small text-muted">${{ me.get_total_spent|apnumber }} / ${{ me.amount|apnumber }}</p>
+                        <div class="bar">
+                            <div class="bar-inner" style="width: {{ me.get_total_spent|get_pct:me.amount }}%;"></div>
+                        </div>
+                        {% if not forloop.last %}<hr>{% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
                 
                 <div class="sider">
                     <h3><i class="fa fa-clock-o"></i>&ensp;Recent spending</h3>

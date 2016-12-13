@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.db.models import Sum, Avg, Q
 
-from budget.models import Budget, Spending, Recipient, Income
+from budget.models import Budget, Spending, Recipient, Income, MajorExpense
 
 from datetime import datetime
 from django.db import connection
@@ -75,10 +75,14 @@ def main(request):
         d['col'] = col
         d['col_accent'] = col_accent
         this_month.append(d)
+
+    active_major_expenses = [x for x in MajorExpense.objects.all() if \
+                             x.get_total_spent() < x.amount]
         
     d = {
         'top_recips': top_recips,
         'earliest_date': earliest_date,
+        'active_major_expenses': active_major_expenses,
         'monthly_budget_total': monthly_budget_total,
         'this_month': this_month,
         'total_this_month': total_this_month,

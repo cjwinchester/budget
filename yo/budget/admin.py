@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.db.models import Sum, DateField
-from budget.models import Budget, Spending, Recipient, Income
+from budget.models import Budget, Spending, Recipient, Income, MajorExpense
 from django.contrib.admin.widgets import AdminDateWidget
 from django.contrib.humanize.templatetags import humanize
 
@@ -10,12 +10,17 @@ class BudgetAdmin(admin.ModelAdmin):
     list_display = ('category', 'monthly_budget',)
     save_on_top = True
 
-    
+
+@admin.register(MajorExpense)
+class MajorExpenseAdmin(admin.ModelAdmin):
+    save_on_top = True
+
+
 @admin.register(Recipient)
 class RecipientAdmin(admin.ModelAdmin):
     list_display = ('name', 'total_sum',)
     search_fields = ('name',)
-    
+
     def total_sum(self, obj):
         sum = obj.spending_set.aggregate(Sum("amount"))["amount__sum"]
         if sum:
@@ -24,18 +29,18 @@ class RecipientAdmin(admin.ModelAdmin):
             return "$0.00"
     total_sum.short_description = "Total spending"
 
-    
+
 @admin.register(Income)
 class IncomeAdmin(admin.ModelAdmin):
     list_display = ('income_date', 'human', 'amount',)
 
-    
+
 @admin.register(Spending)
 class SpendingAdmin(admin.ModelAdmin):
     list_display = ('amount', 'recipient', 'spending_date', 'cat')
-    
+
     formfield_overrides = {
-        DateField: {'widget': AdminDateWidget }
+        DateField: {'widget': AdminDateWidget}
     }
     search_fields = ('recipient__name',)
     list_filter = ('human', 'cat',)
