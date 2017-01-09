@@ -13,7 +13,7 @@
     <body>
       <div class="header">
         <h1>The Winchester Family Budget</h1>
-        <p style="margin-bottom: 4px;">With {{ days_left_this_month }} days left in {{ name_of_this_month }}, we've spent <strong>{{ spent_this_month|get_pct:budget_total|floatformat:"0" }} percent</strong> of our monthly budget: ${{ spent_this_month|apnumber|intcomma }} / ${{ budget_total|apnumber|intcomma }}.</p>
+        <p style="margin-bottom: 4px;">With {{ days_left_this_month }} days left in {{ name_of_this_month }}, we've spent <strong>{{ spent_this_month|get_pct:budget_total|floatformat:"0" }} percent</strong> of our monthly budget.</p>
         <p class="note">
           {% if last_updated %}Updated {{ last_updated|timesince }} ago&ensp;&bull;&ensp;{% endif %}<a href="/admin/budget/" target="_blank" title="Add data">Add data</a>
         </p>
@@ -41,30 +41,13 @@
             {% endfor %}
           </div>
 
-          <div class="box balance">
-            <h3>{{ this_year }} balance</h3>
-            <p>
-              Earned
-              <span class="pull-right">${{ earned_this_year|apnumber|intcomma }}</span>
-            </p>
-            <p>
-              Spent
-              <span class="pull-right">- ${{ spent_this_year|apnumber|intcomma }}</span>
-            </p>
-            <hr>
-            <p class="pull-right"><strong>{{ balance_this_year }}</strong></p>
-            <div class="clearfix"></div>
-
-            {% if savings_this_year %}<p class="note">Includes ${{ savings_this_year|apnumber|intcomma }} transferred to savings</p>{% endif %}
-          </div>
           <div class="box recipients">
             <h3>Recipients</h3>
             <label for="filter">
               {% include "budget/svgs/magnifying-glass.html" %} Filter
               <input id="filter" type="text" />
             </label>
-            <div class="clearfix"></div>
-            <p class="pull-right" style="margin:0; padding-right: 17px;">
+            <p class="pull-right" style="margin:0; padding-right: 17px; margin-top: 3px;">
               <strong>Total</strong>
             </p>
             <div class="clearfix"></div>
@@ -81,6 +64,24 @@
             {% endfor %}
             </div>
           </div>
+
+          <div class="box balance">
+            <h3>{{ this_year }} balance</h3>
+            <p>
+              Earned
+              <span class="pull-right">${{ earned_this_year|apnumber|intcomma }}</span>
+            </p>
+            <p>
+              Spent
+              <span class="pull-right">- ${{ spent_this_year|apnumber|intcomma }}</span>
+            </p>
+            <hr>
+            <p class="pull-right"><strong>{{ balance_this_year }}</strong></p>
+            <div class="clearfix"></div>
+
+            {% if savings_this_year %}<p class="note" style="margin-top: 15px;">Includes ${{ savings_this_year|apnumber|intcomma }} transferred to savings</p>{% endif %}
+          </div>
+
         </div>
       </div>
       {% include "budget/filter.html" %}
