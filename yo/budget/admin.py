@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.db.models import Sum, DateField
-from budget.models import Budget, Spending, Recipient, Income, MajorExpense
+from budget.models import Budget, Spending, Recipient, Income
 from django.contrib.admin.widgets import AdminDateWidget
 from django.contrib.humanize.templatetags import humanize
 
@@ -8,11 +8,6 @@ from django.contrib.humanize.templatetags import humanize
 @admin.register(Budget)
 class BudgetAdmin(admin.ModelAdmin):
     list_display = ('category', 'monthly_budget',)
-    save_on_top = True
-
-
-@admin.register(MajorExpense)
-class MajorExpenseAdmin(admin.ModelAdmin):
     save_on_top = True
 
 

@@ -1,0 +1,24 @@
+<script>
+var filter_items = document.querySelectorAll('.filter-item');
+var filter = document.getElementById('filter');
+
+filter.addEventListener('input', filterList, false);
+
+function filterList() {
+  filter_items_length = filter_items.length;
+  for (var i=0; i<filter_items_length; i++) {
+    if (!filter.value) {
+      filter_items[i].style.display = 'block';
+    } else {
+      var input_value = filter.value.toUpperCase();
+      var text_value = filter_items[i].getAttribute('data-filter');
+      var is_match = text_value.indexOf(input_value) > -1;
+      if (is_match) {
+        filter_items[i].style.display = 'block';
+      } else {
+        filter_items[i].style.display = 'none';
+      }
+    }
+  }
+}
+</script>

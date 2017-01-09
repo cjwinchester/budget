@@ -26,21 +26,6 @@ class Budget(models.Model):
         verbose_name_plural = "Budget items"
 
 
-class MajorExpense(models.Model):
-    name = models.CharField(max_length=150)
-    amount = models.DecimalField(
-        max_digits=10,
-        decimal_places=2
-    )
-    notes = models.TextField(blank=True)
-
-    def get_total_spent(self):
-        return sum([x.amount for x in self.spending_set.all()])
-
-    def __str__(self):
-        return str(self.name)
-
-
 class Recipient(models.Model):
     name = models.CharField(max_length=200, unique=True)
 
@@ -68,7 +53,6 @@ class Spending(models.Model):
         max_length=20,
         choices=HUMANS
     )
-    major_expense = models.ForeignKey(MajorExpense, blank=True, null=True)
     notes = models.TextField(
         blank=True,
         null=True

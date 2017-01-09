@@ -6,5 +6,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls)
 ]
 
-admin.site.site_header = '~ django, yo ~'
-admin.site.index_title = '~ django, yo ~'
+admin.site.site_header = 'The Winchester Family Budget'
+admin.site.index_title = 'The Winchester Family Budget'

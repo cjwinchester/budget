@@ -1,143 +1,88 @@
-{% extends 'budget/base.html' %}
-{% load humanize get_pct %}
-
-{% block content %}
-
+{% load humanize staticfiles get_pct %}
 {% now "F" as name_of_this_month %}
-{% now "Y" as name_of_this_year %}
+{% now "Y" as this_year %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The Winchester Family Budget</title>
+    <link rel="stylesheet" href="{% static 'budget/css/style.css' %}" />
+    </head>
+    <body>
+      <div class="header">
+        <h1>The Winchester Family Budget</h1>
+        <p style="margin-bottom: 4px;">With {{ days_left_this_month }} days left in {{ name_of_this_month }}, we've spent <strong>{{ spent_this_month|get_pct:budget_total|floatformat:"0" }} percent</strong> of our monthly budget: ${{ spent_this_month|apnumber|intcomma }} / ${{ budget_total|apnumber|intcomma }}.</p>
+        <p class="note">
+          {% if last_updated %}Updated {{ last_updated|timesince }} ago&ensp;&bull;&ensp;{% endif %}<a href="/admin/budget/" target="_blank" title="Add data">Add data</a>
+        </p>
+      </div>
 
-<section style="margin-top: 50px; margin-bottom:50px;">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-8">
-                <h1 style="padding: 15px; margin: 0 0 55px 0; background: -webkit-gradient(linear, left top, right top, color-stop({{monthly_diff_pct}}%, {{ monthly_col_accent }}), color-stop({{monthly_diff_pct}}%, #f7f7f7)); background: -moz-linear-gradient(left center,{{ monthly_col_accent }} {{monthly_diff_pct}}%, #f7f7f7 {{monthly_diff_pct}}%); background: -o-linear-gradient(left, {{ monthly_col_accent }} {{monthly_diff_pct}}%, #f7f7f7 {{monthly_diff_pct}}%); background: linear-gradient(to right, {{ monthly_col_accent }} {{monthly_diff_pct}}%, #f7f7f7 {{monthly_diff_pct}}%); border-left: 5px solid {{ monthly_col }}">
-                    With {{ days_left_this_month }} day{{ days_left_this_month|pluralize }} left in {{ name_of_this_month }}, we've spent <span class="bold">${{ total_this_month|intcomma }}</span> ({{monthly_diff_pct|floatformat:"0"}}%) of our <span class="bold">${{ monthly_budget_total|apnumber|intcomma }}</span> monthly budget.
-                </h1>
-            
-        <h2>Categories</h2>
-        {% for cat in this_month %}
-        <div class="item-category" style="background: -webkit-gradient(linear, left top, right top, color-stop({{cat.pct}}%, {{ cat.col_accent }}), color-stop({{cat.pct}}%, #f7f7f7)); background: -moz-linear-gradient(left center,{{ cat.col_accent }} {{cat.pct}}%, #f7f7f7 {{cat.pct}}%); background: -o-linear-gradient(left, {{ cat.col_accent }} {{cat.pct}}%, #f7f7f7 {{cat.pct}}%); background: linear-gradient(to right, {{ cat.col_accent }} {{cat.pct}}%, #f7f7f7 {{cat.pct}}%); border-left: 5px solid {{ cat.col }}">
-
-        <h3 style="margin-bottom:2px;"><a href="{% url 'category-view' cat.category_pk %}">{{ cat.category }}</a> ({{ cat.pct }}%)</h3>
-        ${{ cat.total_spent|intcomma }} / ${{ cat.budgeted_amount|intcomma }}
-        &ensp;{% if cat.autopay %}<span class="note label-autopay">autopay</span>{% endif %}
+      <div class="row">
+        <div class="c g2">
+          {% for category in budget_categories %}
+            {% include "budget/category.html" with category=category %}
+          {% endfor %}
         </div>
-        {% endfor %}
+        <div class="c g2">
+          <div class="box recent">
+            <h3>Recent spending</h3>
+            {% for spending in recent_spending %}
+              <div class="recent-item">
+                <p>
+                {{ spending.spending_date|date:"N j" }} - {{ spending.recipient }}
+                <span class="pull-right">
+                  ${{ spending.amount|intcomma }}
+                </span>
+              </p>
+              </div>
+              <div class="clearfix"></div>
+            {% endfor %}
+          </div>
+
+          <div class="box balance">
+            <h3>{{ this_year }} balance</h3>
+            <p>
+              Earned
+              <span class="pull-right">${{ earned_this_year|apnumber|intcomma }}</span>
+            </p>
+            <p>
+              Spent
+              <span class="pull-right">- ${{ spent_this_year|apnumber|intcomma }}</span>
+            </p>
+            <hr>
+            <p class="pull-right"><strong>{{ balance_this_year }}</strong></p>
+            <div class="clearfix"></div>
+
+            {% if savings_this_year %}<p class="note">Includes ${{ savings_this_year|apnumber|intcomma }} transferred to savings</p>{% endif %}
+          </div>
+          <div class="box recipients">
+            <h3>Recipients</h3>
+            <label for="filter">
+              {% include "budget/svgs/magnifying-glass.html" %} Filter
+              <input id="filter" type="text" />
+            </label>
+            <div class="clearfix"></div>
+            <p class="pull-right" style="margin:0; padding-right: 17px;">
+              <strong>Total</strong>
+            </p>
+            <div class="clearfix"></div>
+            <div class="filter-items">
+            {% for recipient in recipients_with_totals %}
+              {% if recipient.total_sum %}
+              <div class="filter-item" data-filter="{{ recipient.name|upper }}">
+                <p>{{ recipient.name }}
+                  <span class="pull-right">${{ recipient.total_sum|floatformat:0|intcomma }}</span>
+                </p>
+                <div class="clearfix"></div>
+              </div>
+              {% endif %}
+            {% endfor %}
             </div>
-            <div class="col-sm-4">
-
-                <div class="sider">
-                {% include 'budget/search-sidebar.html' %}
-                </div>
-
-                {% if active_major_expenses %}
-                <div class="sider">
-                    <h3><i class="fa fa-birthday-cake"></i> Saving up for</h3>
-                    {% for me in active_major_expenses %}
-                        <p style="margin:0; font-weight: bold;">{{ me.name }}</p>
-                        <p class="small text-muted">${{ me.get_total_spent|apnumber }} / ${{ me.amount|apnumber }}</p>
-                        <div class="bar">
-                            <div class="bar-inner" style="width: {{ me.get_total_spent|get_pct:me.amount }}%;"></div>
-                        </div>
-                        {% if not forloop.last %}<hr>{% endif %}
-                    {% endfor %}
-                </div>
-                {% endif %}
-                
-                <div class="sider">
-                    <h3><i class="fa fa-clock-o"></i>&ensp;Recent spending</h3>
-                    <table class="table">
-                    {% for spend in recent_spending %}
-                        <tr>
-                            <td>
-                            <a href="{% url 'expense-view' spend.pk %}">${{ spend.amount|intcomma }}</a>
-                            </td>
-                            <td>
-                            <a href="{% url 'day-view' spend.spending_date.year spend.spending_date.month spend.spending_date.day %}">{{ spend.spending_date|date:"F j" }}</a>
-                            </td>
-                            <td>
-                            <a href="{% url 'recipient-view' spend.recipient.pk %}">{{ spend.recipient }}</a>
-                            </td>
-                            </tr>
-                    {% endfor %}
-                    </table>
-                </div>
-                
-                <div class="sider">
-            <h3><i class="fa fa-line-chart"></i>&ensp;Top recipients</h3>
-            <table class="table">
-                <tbody>
-                    {% for recip in top_recips %}
-                    {% if recip.total_sum %}
-                    <tr>
-                        <td>{{ forloop.counter }}. <a href="{% url 'recipient-view' recip.pk %}">{{ recip.name }}</a>
-                        </td>
-                        <td>
-                            ${{ recip.total_sum|intcomma }}
-                        </td>
-                    </tr>
-                    {% endif %}
-                    {% endfor %}
-                </tbody>
-            </table>
-            </div>
-
-                <div class="sider">                
-                    <h3><i class="fa fa-calendar"></i>&ensp;Jump to a month</h3>
-                    <input type="text" class="form-control input-lg datepicker" />
-                </div>            
-            
-                <div class="sider">
-                <h3><i class="fa fa-credit-card"></i>&ensp;Grand total</h3>
-                <p class="small">{{ earliest_date }} to {{ last_updated_at|date }}</p>
-                <table class="table">
-                    <tr>
-                        <td class="bold">Income</td>
-                        <td class="text-right">${{ grand_total_income.amount__sum|intcomma }}</td>
-                    </tr>
-                    <tr>
-                        <td class="bold">Spending*</td>
-                        <td class="text-right">${{ grand_total_spending.amount__sum|intcomma }}</td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td class="bold text-right" style="color:{% if balance < 0 %}#d43f3a{% else %}#398439{% endif %}">
-                            {{ balance }}
-                        </td>
-                    </tr>
-                </table>
-                <hr>
-                <p class="small note">*Includes ${{ transfer_to_savings_total|apnumber|intcomma }} transferred to savings</p>
-                </div>
-            
-            
+          </div>
         </div>
-        </div>
-    </div>
-</section>
-
-{% endblock %}
-
-{% block js %}
-<script>
-    
-    var start = new Date("{{ earliest_date|date:'m/d/Y' }}");
-    var end = new Date("{{ last_updated_at|date:'m/d/Y' }}");
-
-    $(".datepicker").datepicker( {
-        format: "MM yyyy",
-        startView: "months", 
-        minViewMode: "months",
-        startDate: start,
-        endDate: end,
-        autoclose: true
-    })
-    .on('changeDate', function(e) {
-        var month = e.date.getMonth() + 1;
-        var year = e.date.getFullYear();
-        window.location = ["/budget", year, month].join("/");
-    });
-    ;
-    
-</script>
-{% endblock %}
+      </div>
+      {% include "budget/filter.html" %}
+    </body>
+</html>
