@@ -71,11 +71,11 @@ def main():
                             mimetype='application/json',
                             resumable=True)
 
-    file = service.files().create(body=file_metadata,
-                                  media_body=media,
-                                  fields='id').execute()
+    f = service.files().create(body=file_metadata,
+                               media_body=media,
+                               fields='id').execute()
 
-    print('File ID: {}'.format(file.get('id')))
+    print('File ID: {}'.format(f.get('id')))
 
 
 if __name__ == '__main__':
