@@ -16,6 +16,7 @@ class Budget(models.Model):
         decimal_places=2
     )
     autopay = models.BooleanField(default=False)
+    complete = models.BooleanField(default=False)
 
     def __str__(self):
         return self.category

@@ -51,7 +51,7 @@
               <span class="pull-right">- ${{ spent_this_year|apnumber|intcomma }}</span>
             </p>
             <hr class="total">
-            <p class="pull-right"><strong>{{ balance_this_year }}</strong></p>
+            <p class="pull-right"><strong>${{ balance_this_year|intcomma }}</strong></p>
 
             {% if savings_this_year %}<p class="note" style="margin-top: 15px;">Includes ${{ savings_this_year|apnumber|intcomma }} transferred to savings</p>{% endif %}
 

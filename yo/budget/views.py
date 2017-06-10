@@ -43,7 +43,8 @@ def main(request):
     recent_spending = Spending.objects.all()[:10]
 
     spent_this_month = Spending.objects.filter(
-                           spending_date__month=this_month
+                           spending_date__month=this_month,
+                           spending_date__year=this_year
                        ).aggregate(Sum('amount'))['amount__sum']
 
     budget_total = Budget.objects.aggregate(
@@ -68,7 +69,9 @@ def main(request):
                               ).order_by('-total_sum')
 
     budget_categories = []
-    for item in Budget.objects.order_by('-monthly_budget'):
+
+    for item in Budget.objects.filter(complete=False) \
+                              .order_by('-monthly_budget'):
         item_d = {}
 
         item_d['category_name'] = item.category
@@ -77,7 +80,8 @@ def main(request):
             item_d['autopay'] = True
 
         amount_spent = item.spending_set.filter(
-                           spending_date__month=this_month
+                           spending_date__month=this_month,
+                           spending_date__year=this_year
                        ).aggregate(Sum("amount"))['amount__sum']
 
         if not amount_spent:
@@ -122,9 +126,6 @@ def main(request):
 
         budget_categories.append(item_d)
 
-        # monthly_average
-        pass
-
     d = {
         'last_updated': last_updated,
         'recipients_with_totals': recipients_with_totals,
@@ -138,4 +139,5 @@ def main(request):
         'budget_total': budget_total,
         'savings_this_year': savings_this_year
     }
+
     return render(request, 'budget/main.html', d)
