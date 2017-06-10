@@ -7,6 +7,8 @@ db.sqlite3
 media
 
 
+.DS_Store
+
 /Include
 /Lib
 /Scripts
