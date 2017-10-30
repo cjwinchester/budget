@@ -7,7 +7,7 @@ from django.contrib.humanize.templatetags import humanize
 
 @admin.register(Budget)
 class BudgetAdmin(admin.ModelAdmin):
-    list_display = ('category', 'monthly_budget',)
+    list_display = ('category', 'monthly_budget', 'complete',)
     save_on_top = True
 
 

@@ -47,7 +47,9 @@ def main(request):
                            spending_date__year=this_year
                        ).aggregate(Sum('amount'))['amount__sum']
 
-    budget_total = Budget.objects.aggregate(
+    budget_items = Budget.objects.filter(complete=False)
+
+    budget_total = budget_items.aggregate(
                        Sum('monthly_budget')
                     )['monthly_budget__sum']
 
@@ -70,8 +72,7 @@ def main(request):
 
     budget_categories = []
 
-    for item in Budget.objects.filter(complete=False) \
-                              .order_by('-monthly_budget'):
+    for item in budget_items.order_by('-monthly_budget'):
         item_d = {}
 
         item_d['category_name'] = item.category
