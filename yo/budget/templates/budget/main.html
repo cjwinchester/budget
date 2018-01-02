@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{% static 'budget/css/style.css' %}" />
     </head>
     <body>
+      {% if spent_this_month > 0 %}
       <div class="header">
         <h1>The Winchester Family Budget</h1>
         <p>With {{ days_left_this_month }} day{{ days_left_this_month|pluralize }} left in {{ name_of_this_month }}, we've spent <strong>{{ spent_this_month|get_pct:budget_total|floatformat:"0" }} percent</strong> of our monthly budget.</p>
@@ -18,7 +19,6 @@
           {% if last_updated %}Updated {{ last_updated|timesince }} ago&ensp;&bull;&ensp;{% endif %}<a href="/admin/budget/" target="_blank" title="Add data">Add data</a>
         </p>
       </div>
-
       <div class="row">
         <div class="c g2">
           {% for category in budget_categories %}
@@ -39,7 +39,6 @@
               </div>
               <div class="clearfix"></div>
             {% endfor %}
-
             <hr>
             <h2>{{ this_year }} balance</h2>
             <p>
@@ -53,7 +52,6 @@
             </p>
             <hr class="total">
             <p class="pull-right"><strong>${{ balance_this_year|intcomma }}</strong></p>
-
             <hr>
             <h2>Recipients</h2>
             <label for="filter">
@@ -76,11 +74,12 @@
               {% endif %}
             {% endfor %}
             </div>
-
           </div>
-
         </div>
       </div>
       {% include "budget/filter.html" %}
+      {% else %}
+        <p>No spending yet this month.</p>
+      {% endif %}
     </body>
 </html>
