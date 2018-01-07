@@ -11,6 +11,14 @@ from decimal import Decimal
 
 def main(request):
 
+    all_time_income = Income.objects.all() \
+                            .aggregate(Sum('amount'))['amount__sum']
+
+    # spending total minus savings transfers
+    savings_cat = Budget.objects.get(category='Transfer to savings')
+    all_time_spending = Spending.objects.exclude(cat=savings_cat) \
+                                .aggregate(Sum('amount'))['amount__sum']
+
     today = datetime.today()
     this_year = today.year
     this_month = today.month
@@ -37,7 +45,7 @@ def main(request):
     balance_this_year = earned_this_year - spent_this_year
 
     savings_this_year = spending_this_year.filter(
-                            cat__category='Transfer to savings'
+                            cat=savings_cat
                         ).aggregate(Sum('amount'))['amount__sum']
 
     recent_spending = Spending.objects.all()[:10]
@@ -138,7 +146,10 @@ def main(request):
         'days_left_this_month': days_left_this_month,
         'budget_categories': budget_categories,
         'budget_total': budget_total,
-        'savings_this_year': savings_this_year
+        'savings_this_year': savings_this_year,
+        'all_time_income': all_time_income,
+        'all_time_spending': all_time_spending,
+        'all_time_balance': all_time_income - all_time_spending,
     }
 
     return render(request, 'budget/main.html', d)

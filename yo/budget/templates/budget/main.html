@@ -81,5 +81,11 @@
       {% else %}
         <p>No spending yet this month.</p>
       {% endif %}
+    <script>
+      console.info('  All-time income: ${{ all_time_income|intcomma }}');
+      console.info('All-time spending: ${{ all_time_spending|intcomma }}');
+      console.info('              ----------------');
+      console.info('              Balance: ${{ all_time_balance|intcomma }}')
+    </script>
     </body>
 </html>
