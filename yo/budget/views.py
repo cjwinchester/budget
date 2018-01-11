@@ -11,20 +11,22 @@ from decimal import Decimal
 
 def main(request):
 
-    all_time_income = Income.objects.all() \
-                            .aggregate(Sum('amount'))['amount__sum']
+    all_spending = Spending.objects.all()
+    all_income = Income.objects.all()
+
+    all_time_income = all_income.aggregate(Sum('amount'))['amount__sum']
 
     # spending total minus savings transfers
     savings_cat = Budget.objects.get(category='Transfer to savings')
-    all_time_spending = Spending.objects.exclude(cat=savings_cat) \
-                                .aggregate(Sum('amount'))['amount__sum']
+    all_time_spending = all_spending.exclude(cat=savings_cat) \
+                                    .aggregate(Sum('amount'))['amount__sum']
 
     today = datetime.today()
     this_year = today.year
     this_month = today.month
     this_day = today.day
 
-    spending_this_year = Spending.objects.filter(
+    spending_this_year = all_spending.filter(
                             spending_date__year=this_year
                          )
 
@@ -32,7 +34,7 @@ def main(request):
                           Sum('amount')
                       )['amount__sum']
 
-    earned_this_year = Income.objects.filter(
+    earned_this_year = all_income.filter(
                           income_date__year=this_year
                        ).aggregate(Sum('amount'))['amount__sum']
 
@@ -48,9 +50,9 @@ def main(request):
                             cat=savings_cat
                         ).aggregate(Sum('amount'))['amount__sum']
 
-    recent_spending = Spending.objects.all()[:10]
+    recent_spending = all_spending[:10]
 
-    spent_this_month = Spending.objects.filter(
+    spent_this_month = all_spending.filter(
                            spending_date__month=this_month,
                            spending_date__year=this_year
                        ).aggregate(Sum('amount'))['amount__sum']
@@ -70,7 +72,7 @@ def main(request):
     days_left_this_month = monthrange(this_year, this_month)[1] - this_day
 
     try:
-        last_updated = Spending.objects.latest('last_modified').last_modified
+        last_updated = all_spending.latest('last_modified').last_modified
     except:
         last_updated = None
 
@@ -100,10 +102,9 @@ def main(request):
             pct = (amount_spent / item.monthly_budget) * 100
 
         item_d['amount_spent'] = amount_spent
-
         item_d['pct'] = pct
 
-        category_spending_this_year = Spending.objects.filter(
+        category_spending_this_year = all_spending.filter(
                                           cat=item
                                       ).filter(spending_date__year=this_year)
 
@@ -117,7 +118,7 @@ def main(request):
         item_d['spending_total'] = spending_total_this_year
 
         truncate_date = connection.ops.date_trunc_sql(
-                        'month', 'spending_date')
+            'month', 'spending_date')
 
         qs = category_spending_this_year.extra({'month': truncate_date})
         spending_by_month = qs.values('month').annotate(

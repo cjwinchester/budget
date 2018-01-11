@@ -52,7 +52,7 @@
             </p>
             <hr class="total">
             <p class="pull-right"><strong>${{ balance_this_year|intcomma }}</strong></p>
-            <hr>
+            <hr style="padding-top: 25px;">
             <h2>Recipients</h2>
             <label for="filter">
               {% include "budget/svgs/magnifying-glass.html" %} Filter
@@ -82,10 +82,10 @@
         <p>No spending yet this month.</p>
       {% endif %}
     <script>
-      console.info('  All-time income: ${{ all_time_income|intcomma }}');
-      console.info('All-time spending: ${{ all_time_spending|intcomma }}');
-      console.info('              ----------------');
-      console.info('              Balance: ${{ all_time_balance|intcomma }}')
+      console.info('All-time income:     ${{ all_time_income|intcomma }}');
+      console.info('All-time spending:   ${{ all_time_spending|intcomma }}');
+      console.info('--------------------------------');
+      console.info('Balance:             ${{ all_time_balance|intcomma }}')
     </script>
     </body>
 </html>
