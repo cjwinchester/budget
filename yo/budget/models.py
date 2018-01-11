@@ -40,7 +40,8 @@ class Recipient(models.Model):
 class Spending(models.Model):
     cat = models.ForeignKey(
         Budget,
-        verbose_name="Category"
+        verbose_name="Category",
+        on_delete=models.CASCADE
     )
     spending_date = models.DateField(
         verbose_name="Date"
@@ -49,7 +50,7 @@ class Spending(models.Model):
         max_digits=10,
         decimal_places=2
     )
-    recipient = models.ForeignKey(Recipient)
+    recipient = models.ForeignKey(Recipient, on_delete=models.CASCADE)
     human = models.CharField(
         max_length=20,
         choices=HUMANS
