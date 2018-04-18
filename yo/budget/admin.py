@@ -17,12 +17,13 @@ class RecipientAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
     def total_sum(self, obj):
-        sum = obj.spending_set.aggregate(Sum("amount"))["amount__sum"]
+        sum = obj.spending_set.aggregate(Sum('amount'))['amount__sum']
         if sum:
-            return "$" + humanize.intcomma(sum)
+            return '$' + humanize.intcomma(sum)
         else:
-            return "$0.00"
-    total_sum.short_description = "Total spending"
+            return '$0.00'
+
+    total_sum.short_description = 'Total spending'
 
 
 @admin.register(Income)
@@ -32,8 +33,7 @@ class IncomeAdmin(admin.ModelAdmin):
 
 @admin.register(Spending)
 class SpendingAdmin(admin.ModelAdmin):
-    list_display = ('amount', 'recipient', 'spending_date', 'cat')
-
+    list_display = ('amount', 'recipient', 'spending_date', 'cat', 'human')
     formfield_overrides = {
         DateField: {'widget': AdminDateWidget}
     }

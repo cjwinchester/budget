@@ -11,4 +11,17 @@
   <p>Total this year: ${{ category.spending_total|floatformat:0|intcomma }}</p>
   <p>Monthly average: ${{ category.monthly_avg|floatformat:0|intcomma }}</p>
   {% if category.pct > 100 %}<div class="overage"></div>{% endif %}
+  
+  {% if category.ubdis %}
+    <div class="ubdi">Includes {{ category.ubdis.count }} unanticipated big-ticket item{{ category.ubdis.count|pluralize }}:
+      <ul>
+      {% for u in category.ubdis %}
+        <li>{{ u.recipient.name }} (${{ u.amount|floatformat:0|intcomma }})</li>
+      {% endfor %}
+      </ul>
+      <p>
+        (Without {{ category.ubdis.count|pluralize:"this expense,these expenses" }}, we would be at ${{ category.ubdi_diff|floatformat:0|intcomma }}.)
+      </p>
+    </div>
+  {% endif %}
 </div>

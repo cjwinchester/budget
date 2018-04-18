@@ -3,9 +3,9 @@ from django.db import models
 
 
 HUMANS = (
-    ("laurel", "Laurel"),
-    ("cody", "Cody"),
-    ("both", "Both"),
+    ('laurel', 'Laurel'),
+    ('cody', 'Cody'),
+    ('both', 'Both'),
 )
 
 
@@ -23,8 +23,8 @@ class Budget(models.Model):
 
     class Meta:
         ordering = ('category',)
-        verbose_name = "Budget item"
-        verbose_name_plural = "Budget items"
+        verbose_name = 'Budget item'
+        verbose_name_plural = 'Budget items'
 
 
 class Recipient(models.Model):
@@ -40,11 +40,11 @@ class Recipient(models.Model):
 class Spending(models.Model):
     cat = models.ForeignKey(
         Budget,
-        verbose_name="Category",
+        verbose_name='Category',
         on_delete=models.CASCADE
     )
     spending_date = models.DateField(
-        verbose_name="Date"
+        verbose_name='Date'
     )
     amount = models.DecimalField(
         max_digits=10,
@@ -59,6 +59,8 @@ class Spending(models.Model):
         blank=True,
         null=True
     )
+    ubdi = models.BooleanField(default=False,
+                               verbose_name='Unanticipated big-dollar item')
     last_modified = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -66,13 +68,13 @@ class Spending(models.Model):
 
     class Meta:
         ordering = ('-spending_date',)
-        verbose_name = "Spending"
-        verbose_name_plural = "Spending"
+        verbose_name = 'Spending'
+        verbose_name_plural = 'Spending'
 
 
 class Income(models.Model):
     income_date = models.DateField(
-        verbose_name="Date"
+        verbose_name='Date'
     )
     amount = models.DecimalField(
         max_digits=10,
@@ -92,5 +94,5 @@ class Income(models.Model):
 
     class Meta:
         ordering = ('-income_date',)
-        verbose_name = "Incoming payment"
-        verbose_name_plural = "Incoming payments"
+        verbose_name = 'Incoming payment'
+        verbose_name_plural = 'Incoming payments'

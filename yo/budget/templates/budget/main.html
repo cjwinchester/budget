@@ -39,12 +39,12 @@
             <h2>Recent spending</h2>
             {% for spending in recent_spending %}
               <div class="list-row">
-                <p>
-                {{ spending.spending_date|date:"N j" }} - {{ spending.recipient }}
-                <span class="pull-right">
-                  ${{ spending.amount|intcomma }}
-                </span>
-              </p>
+                <table>
+                  <tr>
+                    <td style="width: 75%;">{{ spending.spending_date|date:"N j" }} - {{ spending.recipient }}</td>
+                    <td style="width: 25%; text-align: right;">${{ spending.amount|intcomma }}</td>
+                  </tr>
+                </table>
               </div>
               <div class="clearfix"></div>
             {% endfor %}
@@ -54,13 +54,15 @@
               Earned
               <span class="pull-right">${{ earned_this_year|apnumber|intcomma }}</span>
             </p>
+            <div class="clearfix"></div>
             <p>
               Spent
-              {% if savings_this_year %}<span class="note">Includes ${{ savings_this_year|apnumber|intcomma }} transferred to savings</span>{% endif %}
               <span class="pull-right">- ${{ spent_this_year|apnumber|intcomma }}</span>
             </p>
             <hr class="total">
             <p class="pull-right"><strong>${{ balance_this_year|intcomma }}</strong></p>
+            <div class="clearfix"></div>
+            {% if savings_this_year %}<p style="margin-top: 10px;"><span class="note">(Spending includes ${{ savings_this_year|apnumber|intcomma }} transferred to savings)</span></p>{% endif %}
             <hr style="padding-top: 25px;">
             <h2>Recipients</h2>
             <label for="filter">
@@ -94,7 +96,7 @@
       console.info('All-time income:     ${{ all_time_income|intcomma }}');
       console.info('All-time spending:   ${{ all_time_spending|intcomma }}');
       console.info('--------------------------------');
-      console.info('Balance:             ${{ all_time_balance|intcomma }}')
+      console.info('Balance:             ${{ all_time_balance|intcomma }}');
     </script>
     </body>
 </html>

@@ -93,7 +93,7 @@ def main(request):
         amount_spent = item.spending_set.filter(
                            spending_date__month=this_month,
                            spending_date__year=this_year
-                       ).aggregate(Sum("amount"))['amount__sum']
+                       ).aggregate(Sum('amount'))['amount__sum']
 
         if not amount_spent:
             amount_spent = Decimal(0.0)
@@ -133,6 +133,21 @@ def main(request):
             spending_by_month_avg = 0
 
         item_d['monthly_avg'] = spending_by_month_avg
+
+        # unanticipated big-dollar items
+        ubdis = item.spending_set.filter(
+            spending_date__month=this_month,
+            spending_date__year=this_year,
+            ubdi=True
+        )
+
+        item_d['ubdis'] = ubdis
+        ubdi_total = ubdis.aggregate(Sum('amount'))['amount__sum']
+
+        if not ubdi_total:
+            ubdi_total = Decimal(0.0)
+
+        item_d['ubdi_diff'] = amount_spent - ubdi_total
 
         budget_categories.append(item_d)
 
