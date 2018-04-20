@@ -30,9 +30,8 @@ def main(request):
                             spending_date__year=this_year
                          )
 
-    spent_this_year = spending_this_year.aggregate(
-                          Sum('amount')
-                      )['amount__sum']
+    spent_this_year = spending_this_year.exclude(cat=savings_cat) \
+                                        .aggregate(Sum('amount'))['amount__sum']
 
     earned_this_year = all_income.filter(
                           income_date__year=this_year
@@ -56,6 +55,12 @@ def main(request):
                            spending_date__month=this_month,
                            spending_date__year=this_year
                        ).aggregate(Sum('amount'))['amount__sum']
+
+    spent_this_month_no_ubdis = all_spending.filter(
+                           spending_date__month=this_month,
+                           spending_date__year=this_year,
+                           ubdi=True
+    ).aggregate(Sum('amount'))['amount__sum']
 
     budget_items = Budget.objects.filter(complete=False)
 
@@ -160,7 +165,9 @@ def main(request):
         'recent_spending': recent_spending,
         'budget_total': budget_total,
         'spent_this_month': spent_this_month,
+        'spent_this_month_no_ubdis': spent_this_month_no_ubdis,
         'left_this_month': budget_total - spent_this_month,
+        'left_this_month_no_ubdis': budget_total - spent_this_month_no_ubdis,
         'days_left_this_month': days_left_this_month,
         'budget_categories': budget_categories,
         'savings_this_year': savings_this_year,

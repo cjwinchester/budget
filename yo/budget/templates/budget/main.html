@@ -35,6 +35,17 @@
               <br><br>
               <strong>Balance</strong>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>${{ left_this_month|apnumber|intcomma }}</em>
             </p>
+            {% if spent_this_month != spent_this_month_no_ubdis %}
+            <p>
+              <br>
+              <em>Minus unanticipated big-ticket items</em>
+              <br>
+              <strong>Budget total</strong>: ${{ budget_total|apnumber|intcomma }}
+              <br>
+              <strong>Spent</strong>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-${{ spent_this_month_no_ubdis|apnumber|intcomma }}
+              <br><br>
+              <strong>Balance</strong>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>${{ left_this_month_no_ubdis|apnumber|intcomma }}</em>
+            {% endif %}
             <hr>
             <h2>Recent spending</h2>
             {% for spending in recent_spending %}
@@ -62,7 +73,7 @@
             <hr class="total">
             <p class="pull-right"><strong>${{ balance_this_year|intcomma }}</strong></p>
             <div class="clearfix"></div>
-            {% if savings_this_year %}<p style="margin-top: 10px;"><span class="note">(Spending includes ${{ savings_this_year|apnumber|intcomma }} transferred to savings)</span></p>{% endif %}
+            {% if savings_this_year %}<p style="margin-top: 10px;"><span class="note">(Spending does not include ${{ savings_this_year|apnumber|intcomma }} transferred to savings)</span></p>{% endif %}
             <hr style="padding-top: 25px;">
             <h2>Recipients</h2>
             <label for="filter">
