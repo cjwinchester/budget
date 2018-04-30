@@ -59,7 +59,7 @@ def main(request):
     spent_this_month_no_ubdis = all_spending.filter(
                            spending_date__month=this_month,
                            spending_date__year=this_year,
-                           ubdi=True
+                           ubdi=False
     ).aggregate(Sum('amount'))['amount__sum']
 
     budget_items = Budget.objects.filter(complete=False)
