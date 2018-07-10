@@ -31,17 +31,11 @@ def main(request):
                          )
 
     spent_this_year = spending_this_year.exclude(cat=savings_cat) \
-                                        .aggregate(Sum('amount'))['amount__sum']
+                                        .aggregate(Sum('amount'))['amount__sum'] or Decimal(0.0)
 
     earned_this_year = all_income.filter(
                           income_date__year=this_year
-                       ).aggregate(Sum('amount'))['amount__sum']
-
-    if not spent_this_year:
-        spent_this_year = Decimal(0.0)
-
-    if not earned_this_year:
-        earned_this_year = Decimal(0.0)
+                       ).aggregate(Sum('amount'))['amount__sum'] or Decimal(0.0)
 
     balance_this_year = earned_this_year - spent_this_year
 
@@ -54,25 +48,19 @@ def main(request):
     spent_this_month = all_spending.filter(
                            spending_date__month=this_month,
                            spending_date__year=this_year
-                       ).aggregate(Sum('amount'))['amount__sum']
+                       ).aggregate(Sum('amount'))['amount__sum'] or Decimal(0.0)
 
     spent_this_month_no_ubdis = all_spending.filter(
                            spending_date__month=this_month,
                            spending_date__year=this_year,
                            ubdi=False
-    ).aggregate(Sum('amount'))['amount__sum']
+    ).aggregate(Sum('amount'))['amount__sum'] or Decimal(0.0)
 
     budget_items = Budget.objects.filter(complete=False)
 
     budget_total = budget_items.aggregate(
                        Sum('monthly_budget')
-                    )['monthly_budget__sum']
-
-    if not spent_this_month:
-        spent_this_month = Decimal(0.0)
-
-    if not budget_total:
-        budget_total = Decimal(0.0)
+                    )['monthly_budget__sum'] or Decimal(0.0)
 
     days_left_this_month = monthrange(this_year, this_month)[1] - this_day
 
@@ -115,10 +103,7 @@ def main(request):
 
         spending_total_this_year = category_spending_this_year.aggregate(
                                        Sum('amount')
-                                   )['amount__sum']
-
-        if not spending_total_this_year:
-            spending_total_this_year = 0
+                                   )['amount__sum'] or 0
 
         item_d['spending_total'] = spending_total_this_year
 
@@ -132,10 +117,7 @@ def main(request):
 
         spending_by_month_avg = spending_by_month.aggregate(
                                     Avg('amount__sum')
-                                )['amount__sum__avg']
-
-        if not spending_by_month_avg:
-            spending_by_month_avg = 0
+                                )['amount__sum__avg'] or 0
 
         item_d['monthly_avg'] = spending_by_month_avg
 
@@ -147,10 +129,7 @@ def main(request):
         )
 
         item_d['ubdis'] = ubdis
-        ubdi_total = ubdis.aggregate(Sum('amount'))['amount__sum']
-
-        if not ubdi_total:
-            ubdi_total = Decimal(0.0)
+        ubdi_total = ubdis.aggregate(Sum('amount'))['amount__sum'] or Decimal(0.0)
 
         item_d['ubdi_diff'] = amount_spent - ubdi_total
 
